@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111216">
+<meta name="description" content="A curated collection of ranked movies.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src https: data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>GyanDistributer — Movie Rankings</title>
+<style>
+:root{color-scheme:dark;--bg:#111216;--panel:#191a20;--line:#30313a;--text:#f3f0e9;--muted:#a4a4ad;--gold:#d6b878}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 Inter,system-ui,-apple-system,Segoe UI,sans-serif}
+.top{min-height:70px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 max(20px,calc((100% - 1050px)/2));position:sticky;top:0;background:#111216f2;backdrop-filter:blur(12px);z-index:2}
+.brand{font-size:17px;font-weight:800;letter-spacing:.16em}.brand span{color:var(--gold)}.topnote{font-size:10px;letter-spacing:.18em;color:var(--muted)}
+main{width:min(900px,calc(100% - 36px));margin:auto}.hero{padding:55px 0 30px}.eyebrow{font-size:10px;letter-spacing:.2em;color:var(--gold);font-weight:700}.hero h1{font:500 clamp(36px,7vw,58px)/1.1 Georgia,serif;letter-spacing:-.04em;margin:10px 0}.hero p{color:var(--muted);margin:0}
+.toolbar{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:15px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}input{background:#101115;color:var(--text);border:1px solid #3a3b44;border-radius:7px;padding:11px 12px;width:100%;min-width:0}.search{max-width:360px}.count,.muted{font-size:12px;color:var(--muted)}
+.list{display:flex;flex-direction:column}.movie{display:grid;grid-template-columns:48px 88px minmax(0,1fr) 38px;gap:16px;align-items:center;padding:18px 0;border-bottom:1px solid var(--line)}.rank{font:26px Georgia,serif;color:var(--gold);text-align:center}.poster{width:88px;aspect-ratio:2/3;object-fit:cover;background:#25262d;border:1px solid #ffffff12;border-radius:5px}.movie h2{font:500 20px/1.25 Georgia,serif;margin:0 0 6px;overflow-wrap:anywhere}.meta{font-size:11px;color:var(--muted);letter-spacing:.06em}.open{width:36px;height:36px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;color:var(--gold);text-decoration:none}.open:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:3px}.empty{padding:36px 0;color:var(--muted)}
+footer{width:min(900px,calc(100% - 36px));margin:60px auto 25px;padding-top:18px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:11px}
+@media(max-width:560px){.top{min-height:62px;padding:0 18px}.hero{padding:40px 0 25px}.movie{grid-template-columns:34px 72px minmax(0,1fr) 30px;gap:10px;padding:14px 0}.poster{width:72px}.movie h2{font-size:17px}.rank{font-size:21px}.open{width:29px;height:29px}footer{font-size:10px}}
+</style>
+</head>
+<body>
+<header class="top"><div class="brand">GYAN<span>DISTRIBUTER</span></div><div class="topnote">MOVIE RANKINGS</div></header>
+<main>
+<section id="public-view">
+ <div class="hero"><div class="eyebrow">A PERSONAL COLLECTION</div><h1>Movies, ranked.</h1><p>A curated list of films worth your time.</p></div>
+ <div class="toolbar"><input id="search" class="search" type="search" placeholder="Search movies…" aria-label="Search movies" autocomplete="off"><span id="count" class="count">0 movies</span></div>
+ <section id="movie-list" class="list" aria-label="Movie rankings" aria-live="polite"></section>
+</section>
+</main>
+<footer><span>GyanDistributer</span><span>Independent movie collection</span></footer>
+<script>
+(() => {
+  "use strict";
+  // Add new movie entries here before uploading the updated index.html to GitHub.
+  // Use HTTPS links. Keep title text plain; do not paste HTML or scripts.
+  const MOVIES = [
+    // Example format:
+    // { rank: 1, title: "Movie title", url: "https://example.com/movie", poster: "https://example.com/poster.jpg" }
+  ];
+  const search = document.getElementById("search");
+  const count = document.getElementById("count");
+  const root = document.getElementById("movie-list");
+  const safeHttpsUrl = value => {
+    try { const u = new URL(value); return u.protocol === "https:" ? u.href : ""; }
+    catch (_) { return ""; }
+  };
+  function render() {
+    const term = search.value.trim().toLocaleLowerCase();
+    const movies = MOVIES.filter(m => m && typeof m.title === "string" && m.title.toLocaleLowerCase().includes(term))
+      .slice().sort((a,b) => Number(a.rank) - Number(b.rank));
+    count.textContent = movies.length + (movies.length === 1 ? " movie" : " movies");
+    root.replaceChildren();
+    if (!movies.length) {
+      const d = document.createElement("div"); d.className = "empty";
+      d.textContent = MOVIES.length ? "No movies match your search." : "New movie links will be added here soon.";
+      root.append(d); return;
+    }
+    for (const m of movies) {
+      const url = safeHttpsUrl(m.url);
+      if (!url || !Number.isInteger(Number(m.rank)) || Number(m.rank) < 1 || Number(m.rank) > 9999) continue;
+      const article = document.createElement("article"); article.className = "movie";
+      const rank = document.createElement("div"); rank.className = "rank"; rank.textContent = String(Number(m.rank)).padStart(2,"0");
+      const img = document.createElement("img"); img.className = "poster"; img.alt = "Poster for " + m.title; img.loading = "lazy"; img.referrerPolicy = "no-referrer";
+      const poster = typeof m.poster === "string" ? safeHttpsUrl(m.poster) : "";
+      if (poster) { img.src = poster; img.onerror = () => { img.removeAttribute("src"); img.alt = "Poster unavailable"; }; }
+      else { img.alt = "Poster not available"; }
+      const info = document.createElement("div"); const h = document.createElement("h2"); h.textContent = m.title.slice(0,120);
+      const meta = document.createElement("div"); meta.className = "meta"; meta.textContent = "RANKED #" + Number(m.rank); info.append(h,meta);
+      const a = document.createElement("a"); a.className = "open"; a.href = url; a.target = "_blank"; a.rel = "noopener noreferrer nofollow"; a.referrerPolicy = "no-referrer"; a.textContent = "↗"; a.setAttribute("aria-label","Open link for " + m.title.slice(0,120));
+      article.append(rank,img,info,a); root.append(article);
+    }
+  }
+  search.addEventListener("input", render);
+  render();
+})();
+</script>
+</body>
+</html>
