@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#111216">
 <meta name="description" content="A curated collection of ranked movies.">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src https: data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' https: data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>GyanDistributer — Movie Rankings</title>
 <style>
@@ -36,8 +36,8 @@ footer{width:min(900px,calc(100% - 36px));margin:60px auto 25px;padding-top:18px
   // Add new movie entries here before uploading the updated index.html to GitHub.
   // Use HTTPS links. Keep title text plain; do not paste HTML or scripts.
   const MOVIES = [
-    // Example format:
-    // { rank: 1, title: "Movie title", url: "https://example.com/movie", poster: "https://example.com/poster.jpg" }
+    { rank: 1, title: "Lee Cronin's The Mummy (2026)", url: "https://1024tenbox.com/f/file/K0ohParuT6mWhZj-n-xcYw", poster: "mummy-poster.png" },
+    { rank: 2, title: "Gajab Raat (2026)", url: "https://1024tenbox.com/f/file/4dFr9PMDTgGzua0dpXgTpA", poster: "gajab-raat-poster.png" }
   ];
   const search = document.getElementById("search");
   const count = document.getElementById("count");
@@ -63,7 +63,7 @@ footer{width:min(900px,calc(100% - 36px));margin:60px auto 25px;padding-top:18px
       const article = document.createElement("article"); article.className = "movie";
       const rank = document.createElement("div"); rank.className = "rank"; rank.textContent = String(Number(m.rank)).padStart(2,"0");
       const img = document.createElement("img"); img.className = "poster"; img.alt = "Poster for " + m.title; img.loading = "lazy"; img.referrerPolicy = "no-referrer";
-      const poster = typeof m.poster === "string" ? safeHttpsUrl(m.poster) : "";
+      const poster = typeof m.poster === "string" && /^[a-z0-9-]+\\.png$/i.test(m.poster) ? m.poster : "";
       if (poster) { img.src = poster; img.onerror = () => { img.removeAttribute("src"); img.alt = "Poster unavailable"; }; }
       else { img.alt = "Poster not available"; }
       const info = document.createElement("div"); const h = document.createElement("h2"); h.textContent = m.title.slice(0,120);
